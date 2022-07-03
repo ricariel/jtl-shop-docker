@@ -3,7 +3,22 @@
 
 set -e
 
-if [ -z "${CRAWLER_ENTRYPOINT_QUIET_LOGS:-}" ]; then
+set +x
+pid="0"
+
+handle_signal() {
+	echo "Caught signal, stopping gracefully"
+  if [ "x${pid}" != "x0" ]; then
+    kill "${pid}"
+    wait "${pid}"
+  fi
+  exit 0
+}
+
+trap 'handle_signal' INT TERM HUP USR1 USR2
+
+
+if [ -z "${ENTRYPOINT_QUIET_LOGS:-}" ]; then
     exec 3>&1
 else
     exec 3>/dev/null
@@ -33,21 +48,9 @@ else
     echo >&3 "$0: No files found in /docker-entrypoint.d/, skipping configuration"
 fi
 
-set +x
-pid="0"
-
-handle_signal() {
-  echo "Signal!"
-  if [ "x${pid}" != "x0" ]; then
-    kill -SIGTERM "${pid}"
-    wait "${pid}"
-  fi
-  exit 0
-}
-
-trap 'handle_signal' SIGINT SIGTERM SIGHUP SIGUSR1 SIGUSR2
-
+echo "Starting $@"
 "$@" &
 pid="${!}"
 wait "${pid}"
+
 

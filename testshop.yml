@@ -1,0 +1,128 @@
+services:
+  db:
+    image: mariadb:latest
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_AUTO_UPGRADE: shure
+    volumes:
+      - ${CONFIG_PATH}mariadb-${SERVICE_NAME}:/var/lib/mysql
+      - ${CONFIG_PATH}mariadb-init-files:/docker-entrypoint-initdb.d
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    healthcheck:
+        test: mysqladmin -p$$MARIADB_ROOT_PASSWORD ping
+        interval: 30s
+        timeout: 10s
+        retries: 5
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+    volumes:
+      - ${CONFIG_PATH}redis-${SERVICE_NAME}:/data
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    command: --save 60 1
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+  php:
+    restart: unless-stopped
+    image: ricariel/php-fpm-ioncube-composer:latest
+    environment:
+      - SERVICE_NAME=${SERVICE_NAME}
+      - MARIADB_DATABASE=${MARIADB_DATABASE}
+      - MARIADB_USER=${MARIADB_USER}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - PROD=${PROD}
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/app/:/var/www/html/
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/rss.xml:/var/www/html/rss.xml
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/templates_c/:/var/www/html/templates_c/
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/admin/templates_c/:/var/www/html/admin/templates_c/
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/jtllogs:/var/www/html/jtllogs
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/bilder:/var/www/html/bilder
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/export:/var/www/html/export
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/media:/var/www/html/media
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/mediafiles:/var/www/html/mediafiles
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/uploads:/var/www/html/uploads
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/plugins:/var/www/html/plugins
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/downloads:/var/www/html/downloads
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/logs:/var/www/html/dbeS/logs
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/tmp:/var/www/html/dbeS/tmp
+      # Template for all shops
+      - ${CONFIG_PATH}jtl-shop-testshop/config.php:/var/www/html/includes/config.JTL-Shop.ini.php
+      - ${CONFIG_PATH}jtl-shop-testshop/init:/setup
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+  apache:
+    restart: unless-stopped
+    image: ricariel/apache2:latest
+    volumes:
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/app/:/var/www/html/
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/rss.xml:/var/www/html/rss.xml
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/templates_c/:/var/www/html/templates_c/
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/admin/templates_c/:/var/www/html/admin/templates_c/
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/bilder:/var/www/html/bilder
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/export:/var/www/html/export
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/media:/var/www/html/media
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/mediafiles:/var/www/html/mediafiles
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/uploads:/var/www/html/uploads
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/plugins:/var/www/html/plugins
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/downloads:/var/www/html/downloads
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/jtllogs:/var/www/html/jtllogs
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/logs:/var/www/html/dbeS/logs
+      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/tmp:/var/www/html/dbeS/tmp
+      # Template for all shops
+      - ${CONFIG_PATH}jtl-shop-testshop/proxy-php.conf:/proxy-php.conf
+      - ${CONFIG_PATH}jtl-shop-testshop/config.php:/var/www/html/includes/config.JTL-Shop.ini.php
+      - ${CONFIG_PATH}jtl-shop-testshop/init:/setup
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      - PHP_FPM=${PHP_FPM}
+      - JTL_SHOP_VERSION=${JTL_SHOP_VERSION}
+      - SERVICE_NAME=${SERVICE_NAME}
+      - MARIADB_DATABASE=${MARIADB_DATABASE}
+      - MARIADB_USER=${MARIADB_USER}
+      - MARIADB_PASSWORD=${MARIADB_PASSWORD}
+      - PROD=${PROD}
+    networks:
+      - default
+      - docker_gwbridge
+    command: >
+      sh -c "
+            /setup/setupShop.sh
+            apache2ctl -DFOREGROUND
+            "
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.${SERVICE_NAME}.entrypoints=websecure
+      - traefik.http.routers.${SERVICE_NAME}.rule=${URL}
+      - traefik.http.routers.${SERVICE_NAME}.tls=true
+      - traefik.http.routers.${SERVICE_NAME}.tls.certresolver=myresolver
+      - traefik.http.routers.${SERVICE_NAME}.middlewares=localnet@file
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=443
+      - traefik.http.services.${SERVICE_NAME}.loadbalancer.server.scheme=https
+      - traefik.http.serverstransports.${SERVICE_NAME}.insecureSkipVerify=true
+      - traefik.docker.network=docker_gwbridge
+    healthcheck:
+      test: ["CMD", "curl", "--silent", "https://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.driver.mtu: 1400
+  docker_gwbridge:
+    external: true
