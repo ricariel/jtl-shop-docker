@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 if [ ! -f "/var/www/html/.version" ] || [ ${JTL_SHOP_VERSION} != $(cat /var/www/html/.version) ]; then
   echo "upgrade or install"
 	cd /docker-entrypoint.d/setup/
