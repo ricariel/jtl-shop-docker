@@ -62,7 +62,7 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
   apache:
     restart: unless-stopped
-    image: ricariel/apache2:latest
+    image: ricariel/jtl-shop:latest
     volumes:
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/app/:/var/www/html/
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/templates_c/:/var/www/html/templates_c/
@@ -91,11 +91,6 @@ services:
     networks:
       - default
       - docker_gwbridge
-    command: >
-      sh -c "
-            /setup/setupShop.sh
-            apache2ctl -DFOREGROUND
-            "
     labels:
       - traefik.enable=true
       - traefik.http.routers.${SERVICE_NAME}.entrypoints=websecure
