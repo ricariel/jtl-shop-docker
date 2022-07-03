@@ -14,7 +14,9 @@ RUN apt-get update \
 COPY proxy-php.conf /etc/apache2/conf-available/proxy-php.conf
 RUN a2enconf proxy-php
 
-COPY ./docker-entrypoint.d/ /
+COPY /docker-entrypoint.d/* /docker-entrypoint.d/
+ONBUILD COPY /docker-entrypoint.d/* /docker-entrypoint.d/
+
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
 

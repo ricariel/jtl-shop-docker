@@ -1,10 +1,4 @@
 #!/bin/bash
-
-if [ ! -z "$PHP_FPM" ]; then
-	echo "modify fpm worker" 
-	sed -i "s/fcgi:\/\/.*:9000/fcgi:\/\/${PHP_FPM}:9000/g" /etc/apache2/conf-available/proxy-php.conf
-fi
-
 if [ ! -f "/var/www/html/.version" ] || [ ${JTL_SHOP_VERSION} != $(cat /var/www/html/.version) ]; then
   echo "upgrade or install"
 	cd /docker-entrypoint.d/setup/
