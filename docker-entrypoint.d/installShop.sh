@@ -13,6 +13,7 @@ if [ ! -f "/var/www/html/.version" ] || [ ${JTL_SHOP_VERSION} != $(cat /var/www/
   unzip -qo ${JTL_SHOP_VERSION}.zip -d /var/www/html/ -x 'install/*'
   cp -Rp /docker-entrypoint.d/setup/plugins/* /var/www/html/includes/plugins/
   cp -Rp /docker-entrypoint.d/setup/templates/* /var/www/html/templates/
+  cp -p /docker-entrypoint.d/setup/config.php /var/www/html/includes/config.JTL-Shop.ini.php
   cp -p /docker-entrypoint.d/setup/.user.ini /var/www/html/
   patch /var/www/html/admin/.htaccess /docker-entrypoint.d/setup/admin_htaccess.patch
   patch /var/www/html/.htaccess /docker-entrypoint.d/setup/global_htaccess.patch
