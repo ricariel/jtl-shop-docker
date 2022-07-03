@@ -1,0 +1,9 @@
+#logo a img {
+	max-height: 100%;
+}
+
+#main-wrapper.boxed header #header-branding {
+	padding-top: 1ex;
+	padding-bottom:1ex;
+
+}

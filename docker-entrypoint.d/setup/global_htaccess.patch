@@ -1,0 +1,88 @@
+--- ../html/app/.htaccess	2022-05-06 09:50:56.000000000 +0200
++++ ht.orig	2022-05-31 12:08:14.906294520 +0200
+@@ -1,3 +1,79 @@
++<FilesMatch "(cli|.user.ini)$">
++Order Allow,Deny
++Deny from all
++</FilesMatch>
++
++
++<IfModule mod_expires.c>
++   ExpiresActive on
++   # set default
++   ExpiresDefault "access plus 24 hours"
++   
++   # cache common graphics
++   ExpiresByType image/jpg "access plus 1 months"
++   ExpiresByType image/gif "access plus 1 months"
++   ExpiresByType image/jpeg "access plus 1 months"
++   ExpiresByType image/png "access plus 1 months"
++   ExpiresByType image/x-icon "access plus 1 months"
++
++   # cache CSS
++   ExpiresByType text/css "access plus 1 months"
++
++   # cache other filetypes
++   ExpiresByType text/javascript "access plus 1 months"
++   ExpiresByType application/javascript "access plus 1 months"
++   ExpiresByType application/x-shockwave-flash "access plus 1 months"
++
++    AddType application/vnd.ms-fontobject .eot
++   ExpiresByType application/x-font-fontobject "access plus 1 year"
++    AddType application/x-font-ttf .ttf
++   ExpiresByType application/x-font-ttf "access plus 1 year"
++    AddType application/x-font-opentype .otf
++   ExpiresByType application/x-font-opentype "access plus 1 year"
++
++   AddType application/x-font-woff .woff
++   ExpiresByType application/x-font-woff "access plus 1 year"
++</IfModule>
++
++<IfModule mod_headers.c>
++   <FilesMatch "\\.(js|css|xml|gz|html|svg)$"> 
++      Header append Vary Accept-Encoding 
++   </FilesMatch>
++   <filesMatch "\\.(ico|pdf|flv|jpg|jpeg|png|gif|swf|jpe|svg|woff)$">
++      Header set Cache-Control "max-age=31536000, public"
++   </filesMatch>
++   <filesMatch "\\.(css)$">
++      Header set Cache-Control "max-age=31536000, public"
++   </filesMatch>
++   <filesMatch "\\.(js)$">
++      Header set Cache-Control "max-age=31536000, public"
++   </filesMatch>
++   <filesMatch "\\.(xml|txt)$">
++      Header set Cache-Control "max-age=31536000, public, must-revalidate"
++   </filesMatch>
++   <filesMatch "\\.(html|htm|php)$">
++      Header set Cache-Control "max-age=1, private, must-revalidate"
++   </filesMatch>
++</ifModule>
++
++<ifModule mod_deflate.c>
++   <FilesMatch "\\.(js|css|html|htm|php|xml|svg)$">
++      SetOutputFilter DEFLATE
++   </FilesMatch>
++</ifModule>
++
++<IfModule mod_rewrite.c>
++   RewriteEngine on
++  <IfDefine DEVELOPMENT_SERVER>
++    RewriteBase /~fabrice
++  </IfDefine>
++  RewriteRule ^static/(.*)$ templates_c/min/$1 [QSA,L]
++  RewriteRule ^dbeS/tmp/(.*)$ - [F,L]
++  RewriteRule ^dbeS/(.*)\.php$ dbeS/index.php?id=$1 [QSA,L]
++  RewriteRule ^dbeS/(.*)$ - [F,L]
++ 
++</IfModule>
++
+ <IfModule mod_setenvif.c>
+   <IfModule mod_headers.c>
+     <FilesMatch "\.(bmp|cur|gif|ico|jpe?g|png|svgz?|webp)$">
+@@ -112,4 +188,4 @@
+ 
+ FileETag None
+ #Server Signatur deaktivieren
+-#ServerSignature Off
++ServerSignature Off

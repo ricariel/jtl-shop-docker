@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding="ISO-8859-1"?>
+<jtlshop3plugin>
+<Name>Casa Due</Name>
+<Description>Mit diesem Plugin werden Casa Due pur spezifische Änderungen durchgführt.</Description>
+<Author>Fabrice Schindler</Author>
+<PluginID>zyria_casadue</PluginID>
+<URL>http://www.zyria.de</URL>
+<XMLVersion>102</XMLVersion>
+<Shop4Version>406</Shop4Version>
+<Install>
+  <Version nr="100">
+    <CreateDate>2013-03-30</CreateDate>
+  </Version>
+  <Version nr="101">
+    <CreateDate>2019-04-16</CreateDate>
+	</Version>
+	<Hooks>
+		<Hook id="140">casadue.php</Hook>
+	</Hooks>
+</Install>
+</jtlshop3plugin>

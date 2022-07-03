@@ -1,0 +1,20 @@
+--- html-new/admin/.htaccess	2021-12-06 09:48:52.000000000 +0100
++++ html/admin/.htaccess	2022-04-12 13:15:44.000000000 +0200
+@@ -1,2 +1,17 @@
+ RewriteEngine off
+ 
++Require ip 159.69.238.80/28
++Require ip 2a01:4f8:fff0:22::/64
++Require ip 195.14.212.250
++Require ip 192.168.0.0/16
++Require ip 10.0.0.0/16
++Require ip 87.140.122.86/32
++Require ip 80.147.150.93/32
++Require ip 2003:a:47:9100::/56
++Require ip 2003:a:e63:1900::/56
++Require ip 2003:a:121a:5600::/56
++Require ip 2003:a:121a:5800::/56
++Require ip 2003:a:b16:4700::/56
++Require forward-dns rudert.mr.casa-due-pur.de
++Require forward-dns oberstadt.mr.casa-due-pur.de
++ErrorDocument 403 /
