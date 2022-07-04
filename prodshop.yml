@@ -45,7 +45,6 @@ services:
       - DOMAIN=${DOMAIN}
     volumes:
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/app/:/var/www/html/
-      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/rss.xml:/var/www/html/rss.xml
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/templates_c/:/var/www/html/templates_c/
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/admin/templates_c/:/var/www/html/admin/templates_c/
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/jtllogs:/var/www/html/jtllogs
@@ -58,17 +57,13 @@ services:
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/downloads:/var/www/html/downloads
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/logs:/var/www/html/dbeS/logs
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/tmp:/var/www/html/dbeS/tmp
-      # Template for all shops
-      - ${CONFIG_PATH}jtl-shop-testshop/config.php:/var/www/html/includes/config.JTL-Shop.ini.php
-      - ${CONFIG_PATH}jtl-shop-testshop/init:/setup
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
   apache:
     restart: unless-stopped
-    image: ricariel/apache2:latest
+    image: ricariel/jtl-shop:latest
     volumes:
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/app/:/var/www/html/
-      - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/rss.xml:/var/www/html/rss.xml
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/templates_c/:/var/www/html/templates_c/
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/admin/templates_c/:/var/www/html/admin/templates_c/
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/bilder:/var/www/html/bilder
@@ -81,10 +76,6 @@ services:
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/jtllogs:/var/www/html/jtllogs
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/logs:/var/www/html/dbeS/logs
       - ${CONFIG_PATH}jtl-shop-${SERVICE_NAME}/html/dbeS/tmp:/var/www/html/dbeS/tmp
-      # Template for all shops
-      - ${CONFIG_PATH}jtl-shop-testshop/proxy-php.conf:/proxy-php.conf
-      - ${CONFIG_PATH}jtl-shop-testshop/config.php:/var/www/html/includes/config.JTL-Shop.ini.php
-      - ${CONFIG_PATH}jtl-shop-testshop/init:/setup
       - "/etc/timezone:/etc/timezone:ro"
       - "/etc/localtime:/etc/localtime:ro"
     environment:
@@ -98,11 +89,6 @@ services:
     networks:
       - default
       - docker_gwbridge
-    command: >
-      sh -c "
-            /setup/setupShop.sh
-            apache2ctl -DFOREGROUND
-            "
     labels:
       - traefik.enable=true
       - traefik.http.routers.${SERVICE_NAME}.entrypoints=websecure
